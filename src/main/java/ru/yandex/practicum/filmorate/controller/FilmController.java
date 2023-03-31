@@ -19,7 +19,6 @@ public class FilmController {
     @Autowired
     private FilmService filmService;
 
-
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film film) {
         log.info("Добавили фильм: {}", film);
