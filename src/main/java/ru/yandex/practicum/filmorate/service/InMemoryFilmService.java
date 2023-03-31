@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class InMemoryFilmService implements FilmService{
+public class InMemoryFilmService implements FilmService {
 
     private int id = 1;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
