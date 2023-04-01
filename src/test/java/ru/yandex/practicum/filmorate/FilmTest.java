@@ -11,10 +11,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.yandex.practicum.filmorate.service.InMemoryFilmService.LENGTH_DESCRIPTION;
+import static ru.yandex.practicum.filmorate.service.InMemoryFilmService.MIN_RELEASE_DATE;
 
 public class FilmTest {
     FilmController filmController;
-    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     Film film1;
     Film film2;
 
@@ -73,7 +74,7 @@ public class FilmTest {
                 "блаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблаблабла" +
                 "блаблаблаблаблабла\n");
         ValidateException exception = assertThrows(ValidateException.class, () -> filmController.addFilm(film1));
-        String newErrorMessage = "Максимальная длина описания — 200 символов";
+        String newErrorMessage = "Максимальная длина описания — " + LENGTH_DESCRIPTION;
         assertEquals(newErrorMessage, exception.getMessage());
     }
 

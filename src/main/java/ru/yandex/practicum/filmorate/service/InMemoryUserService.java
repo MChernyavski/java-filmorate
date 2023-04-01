@@ -23,6 +23,7 @@ public class InMemoryUserService implements UserService {
         validateUser(user);
         user.setId(id++);
         users.put(user.getId(), user);
+        log.info("Добавили пользователя: {}", user.getId());
         return user;
     }
 
@@ -31,20 +32,21 @@ public class InMemoryUserService implements UserService {
         if (!users.containsKey(user.getId())) {
             log.error("ERROR: Не существует пользователя с таким id {} ", user.getId());
             throw new ValidateException("Отсутствует пользователь c id " + user.getId());
-        } else {
-            validateUser(user);
-            users.put(user.getId(), user);
-            return user;
         }
+        validateUser(user);
+        users.put(user.getId(), user);
+        log.info("Обновили пользователя: {}", user.getId());
+        return user;
     }
 
     @Override
     public List<User> getAllUsers() {
+        log.info("Получили список пользователей");
         return new ArrayList<>(users.values());
     }
 
     public void validateUser(User user) {
-        if (user.getEmail() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("ERROR: электронная почта пустая");
             throw new ValidateException("Электронная почта не может быть пустой");
         }
@@ -60,7 +62,7 @@ public class InMemoryUserService implements UserService {
             log.error("ERROR: логин содержит пробелы");
             throw new ValidateException("Логин не может содержать пробелы");
         }
-        if (user.getName() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()) {
+        if (user.getName() == null || user.getEmail().isBlank()) {
             log.error("ERROR: Поле Name пустой. Используйте логин в качестве имени {} ", user.getLogin());
             user.setName(user.getLogin());
         }

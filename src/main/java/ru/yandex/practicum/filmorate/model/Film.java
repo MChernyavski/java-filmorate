@@ -15,7 +15,7 @@ public class Film {
     private int id;
     @NotBlank
     private String name; // название не может быть пустым
-    @NotNull
+    @NotBlank
     @Size(max = 200) //описание должно быть не больше 200 символов
     private String description;
     private LocalDate releaseDate;

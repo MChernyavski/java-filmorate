@@ -21,19 +21,16 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        log.info("Добавили пользователя: {}", user.getId());
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Обновили пользователя: {}", user.getId());
         return userService.updateUser(user);
     }
 
     @GetMapping
     public List<User> getAll() {
-        log.info("Получили список пользователей");
         return userService.getAllUsers();
     }
 }
