@@ -18,7 +18,6 @@ import static ru.yandex.practicum.filmorate.service.FilmService.MIN_RELEASE_DATE
 
 public class FilmTest {
     FilmController filmController;
-
     UserStorage userStorage;
     FilmStorage filmStorage;
     Film film1;
