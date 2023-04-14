@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +15,7 @@ import javax.validation.constraints.Pattern;
 @Data
 @Builder
 public class User {
-    private int id;
+    private long id;
     @NotBlank
     @Email
     private String email; // электронная почта не может быть пустой и должна содержать символ @;
@@ -23,4 +25,5 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday; //дата рождения не может быть в будущем.
+    private final Set<Long> friends = new HashSet<>();
 }
