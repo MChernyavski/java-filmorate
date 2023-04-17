@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     public static final int LENGTH_DESCRIPTION = 200;
 
@@ -46,27 +46,13 @@ public class FilmService {
     }
 
     public Film addLike(long filmId, long userId) {
-        if (!filmStorage.films().containsKey(filmId)) {
-            log.error("ERROR: Не существует фильма с таким id {} ", filmId);
-            throw new NotFoundException("Отсутствует фильм c id " + filmId);
-        }
-        if (!userStorage.users().containsKey(userId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", userId);
-            throw new NotFoundException("Отсутствует пользователь c id " + userId);
-        }
+        userStorage.getUserById(userId);
         getFilmById(filmId).getLikes().add(userId);
         return getFilmById(filmId);
     }
 
     public Film removeLike(long filmId, long userId) {
-        if (!filmStorage.films().containsKey(filmId)) {
-            log.error("ERROR: Не существует фильма с таким id {} ", filmId);
-            throw new NotFoundException("Отсутствует фильм c id " + filmId);
-        }
-        if (!userStorage.users().containsKey(userId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", userId);
-            throw new NotFoundException("Отсутствует пользователь c id " + userId);
-        }
+        userStorage.getUserById(userId);
         getFilmById(filmId).getLikes().remove(userId);
         return getFilmById(filmId);
     }

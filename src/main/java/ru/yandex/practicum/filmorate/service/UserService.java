@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -41,15 +41,7 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-    public User addToFriend(long userId, long friendId) {
-        if (!userStorage.users().containsKey(userId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", userId);
-            throw new NotFoundException("Отсутствует пользователь c id " + userId);
-        }
-        if (!userStorage.users().containsKey(friendId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", friendId);
-            throw new NotFoundException("Отсутствует пользователь c id " + friendId);
-        }
+    public void addToFriend(long userId, long friendId) {
         if (getUserById(userId).getFriends().contains(friendId)) {
             log.error("ERROR: Пользователь с id {} уже в друзьях у пользователя с id {} ", userId, friendId);
             throw new ValidateException("Пользователь с id " + userId + " уже в друзьях у пользователя с id " + friendId);
@@ -62,20 +54,10 @@ public class UserService {
 
         log.info("Пользователь с id {} добавлен в друзья к {}", friendId, userId);
         log.info("Пользователь с id {} добавлен в друзья к {}", userId, friendId);
-
-        return getUserById(userId);
     }
 
-    public User deleteFromFriend(long userId, long friendId) {
-        if (!userStorage.users().containsKey(userId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", userId);
-            throw new NotFoundException("Отсутствует пользователь c id " + userId);
-        }
-        if (!userStorage.users().containsKey(friendId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", friendId);
-            throw new NotFoundException("Отсутствует пользователь c id " + friendId);
-        }
-        if (!userStorage.users().get(userId).getFriends().contains(friendId)) {
+    public void deleteFromFriend(long userId, long friendId) {
+        if (!userStorage.getUserById(userId).getFriends().contains(friendId)) {
             log.error("ERROR: Пользователя с id {} нет в друзьях у пользователя с id {} ", userId, friendId);
             throw new NotFoundException("Пользователя с id " + userId + " нет в друзьях у пользователя с id " + friendId);
         }
@@ -83,18 +65,10 @@ public class UserService {
         getUserById(friendId).getFriends().remove(userId);
         log.info("Пользователь с id {} удалён из друзей {}", friendId, userId);
         log.info("Пользователь с id {} удалён из друзей {}", userId, friendId);
-        return getUserById(userId);
     }
 
     public List<User> getCommonFriends(long userId, long friendId) {
-        if (!userStorage.users().containsKey(userId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", userId);
-            throw new NotFoundException("Отсутствует пользователь c id " + userId);
-        }
-        if (!userStorage.users().containsKey(friendId)) {
-            log.error("ERROR: Не существует пользователя с таким id {} ", friendId);
-            throw new NotFoundException("Отсутствует пользователь c id " + friendId);
-        }
+
         return getUserById(userId).getFriends()
                 .stream()
                 .filter(getUserById(friendId).getFriends()::contains)

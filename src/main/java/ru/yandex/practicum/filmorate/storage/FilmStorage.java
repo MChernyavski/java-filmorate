@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface FilmStorage {
-    Map<Long, Film> films();
 
     Film addFilm(Film film);
 
