@@ -5,23 +5,31 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.filmorate.service.InMemoryFilmService.LENGTH_DESCRIPTION;
-import static ru.yandex.practicum.filmorate.service.InMemoryFilmService.MIN_RELEASE_DATE;
+import static ru.yandex.practicum.filmorate.service.FilmService.LENGTH_DESCRIPTION;
+import static ru.yandex.practicum.filmorate.service.FilmService.MIN_RELEASE_DATE;
 
 public class FilmTest {
     FilmController filmController;
+    UserStorage userStorage;
+    FilmStorage filmStorage;
     Film film1;
     Film film2;
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController(new InMemoryFilmService());
+        filmStorage = new InMemoryFilmStorage();
+        userStorage = new InMemoryUserStorage();
+        filmController = new FilmController(new FilmService(filmStorage, userStorage));
         film1 = Film.builder()
                 .id(1)
                 .name("Человек-паук")

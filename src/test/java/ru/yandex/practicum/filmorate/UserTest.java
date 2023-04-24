@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.InMemoryUserService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,12 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserTest {
 
     private static UserController userController;
+    static UserStorage userStorage;
     private static User user1;
     private static User user2;
 
     @BeforeAll
     public static void init() {
-        userController = new UserController(new InMemoryUserService());
+        userStorage = new InMemoryUserStorage();
+        userController = new UserController(new UserService(userStorage));
     }
 
     @BeforeEach
@@ -30,7 +34,6 @@ public class UserTest {
                 .email("email1@email.ru")
                 .login("login1")
                 .birthday(LocalDate.of(1991, 7, 16))
-                .name("name1")
                 .build();
 
         user2 = User.builder()
