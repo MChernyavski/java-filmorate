@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/films")
@@ -16,8 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class FilmController {
 
-    @Autowired
-    private FilmService filmService;
+    private final FilmService filmService;
 
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film film) {
@@ -40,7 +39,7 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable long id, @PathVariable long userId) {
+    public List<Long> addLike(@PathVariable long id, @PathVariable long userId) {
         return filmService.addLike(id, userId);
     }
 

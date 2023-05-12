@@ -5,31 +5,34 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.filmorate.service.FilmService.LENGTH_DESCRIPTION;
-import static ru.yandex.practicum.filmorate.service.FilmService.MIN_RELEASE_DATE;
+import static ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl.LENGTH_DESCRIPTION;
+import static ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl.MIN_RELEASE_DATE;
 
 public class FilmTest {
     FilmController filmController;
+    FilmDbStorage filmDbStorage;
     UserStorage userStorage;
     FilmStorage filmStorage;
+    MpaStorage mpaStorage;
+    FilmGenreStorage filmGenreStorage;
+    GenreStorage genreStorage;
+    LikesDbStorage likesDbStorage;
     Film film1;
     Film film2;
 
     @BeforeEach
     public void beforeEach() {
-        filmStorage = new InMemoryFilmStorage();
-        userStorage = new InMemoryUserStorage();
-        filmController = new FilmController(new FilmService(filmStorage, userStorage));
+        filmController = new FilmController(new FilmServiceImpl(filmStorage, userStorage,
+                filmGenreStorage, mpaStorage, genreStorage, likesDbStorage));
         film1 = Film.builder()
                 .id(1)
                 .name("Человек-паук")
