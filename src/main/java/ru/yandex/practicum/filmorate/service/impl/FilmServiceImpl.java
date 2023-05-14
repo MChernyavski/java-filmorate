@@ -2,12 +2,9 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDbStorage;
@@ -30,9 +27,9 @@ public class FilmServiceImpl implements FilmService {
     public static final int LENGTH_DESCRIPTION = 200;
 
     @Autowired
-    public FilmServiceImpl(@Qualifier("FilmDbStorage")FilmStorage filmStorage,
-                           @Qualifier("UserDbStorage") UserStorage userStorage,
-                           FilmGenreStorage filmGenreStorage,MpaStorage mpaStorage, GenreStorage genreStorage,
+    public FilmServiceImpl(FilmStorage filmStorage,
+                           UserStorage userStorage,
+                           FilmGenreStorage filmGenreStorage, MpaStorage mpaStorage, GenreStorage genreStorage,
                            LikesDbStorage likesDbStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
@@ -54,6 +51,7 @@ public class FilmServiceImpl implements FilmService {
     public Film updateFilm(Film film) {
         validateFilms(film);
         filmStorage.updateFilm(film);
+        filmGenreStorage.removeGenreFromFilm(film.getId());
         film.getGenres().forEach(genre -> filmGenreStorage.addGenreToFilm(film.getId(), genre.getId()));
         return film;
     }
@@ -63,7 +61,7 @@ public class FilmServiceImpl implements FilmService {
         return filmStorage.getAllFilms()
                 .stream()
                 .peek(film -> genreStorage.getGenreByFilm(film.getId())
-                .forEach(film::addGenre))
+                        .forEach(film::addGenre))
                 .collect(Collectors.toList());
     }
 
@@ -84,19 +82,20 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film removeLike(long filmId, long userId) {
-        User user = userStorage.getUserById(userId);
-        likesDbStorage.deleteLike(filmId, user.getId());
+        userStorage.getUserById(userId);
+        likesDbStorage.deleteLike(filmId, userId);
         return getFilmById(filmId);
     }
 
     @Override
     public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getAllFilms()
+        return filmStorage.getMostPopularFilms(count)
                 .stream()
                 .sorted((f0, f1) -> Integer.compare(f1.getLikes().size(), f0.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
 
     public void validateFilms(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {

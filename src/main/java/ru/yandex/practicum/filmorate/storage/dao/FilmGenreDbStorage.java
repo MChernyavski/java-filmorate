@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 @Repository("FilmGenreDbStorage")
 public class FilmGenreDbStorage implements FilmGenreStorage {
@@ -18,22 +17,15 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public boolean addGenreToFilm(long filmId, long genreId) {
+    public void addGenreToFilm(long filmId, long genreId) {
         String sqlGenreFilm = "insert into film_genre (film_id, genre_id) values (?,?)";
-       return (jdbcTemplate.update(sqlGenreFilm, filmId, genreId)) > 0;
+        jdbcTemplate.update(sqlGenreFilm, filmId, genreId);
     }
 
     @Override
-    public boolean removeGenreFromFilm(long filmId, int genreId) {
-        String sqlRemoveGenre = "delete from film_genre where film_id =? and genre_id = ?";
-       return (jdbcTemplate.update(sqlRemoveGenre, filmId, genreId)) > 0;
-    }
-
-    @Override
-    public List<FilmGenre> getGenreByFilm(long id) {
-        String sqlGenreFilm = "select g.* from FILM_GENRE as fg join GENRES as g on fg.genre_id = g.genre_id " +
-                "where fg.film_id = ? ORDER BY g.GENRE_ID";
-         return jdbcTemplate.query(sqlGenreFilm, (rs, rowNum) -> mapToRowFilmGenre(rs), id);
+    public void removeGenreFromFilm(long filmId) {
+        String sqlRemoveGenre = "delete from film_genre where film_id =?";
+        jdbcTemplate.update(sqlRemoveGenre, filmId);
     }
 
     private FilmGenre mapToRowFilmGenre(ResultSet rs) throws SQLException {

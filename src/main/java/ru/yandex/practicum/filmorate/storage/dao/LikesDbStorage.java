@@ -3,19 +3,15 @@ package ru.yandex.practicum.filmorate.storage.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Likes;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
 import javax.validation.ValidationException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static java.lang.String.format;
 
-@Repository ("LikesDbStorage")
+@Repository("LikesDbStorage")
 @Slf4j
 public class LikesDbStorage implements LikesStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -27,8 +23,8 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void addLike(long filmId, long userId) {
         try {
-            String sqlAddLike = "insert into likes (user_id, film_id) values (?, ?)";
-            jdbcTemplate.update(sqlAddLike, userId, filmId);
+            String sqlAddLike = "insert into likes (film_id, user_id) values (?, ?)";
+            jdbcTemplate.update(sqlAddLike, filmId, userId);
         } catch (DataAccessException exception) {
             log.error("Пользователь c id = {} уже лайкнул фильм с id = {}", userId, filmId);
             throw new ValidationException(format("Пользователь с id = %s уже лайкнул фильм с id = %s",
@@ -36,11 +32,10 @@ public class LikesDbStorage implements LikesStorage {
         }
     }
 
-
     @Override
     public void deleteLike(long filmId, long userId) {
-         String sqlDeleteLike = "delete from likes where (film_id = ? and user_id = ?)";
-         jdbcTemplate.update(sqlDeleteLike, userId, filmId);
+        String sqlDeleteLike = "delete from likes where (film_id = ? and user_id = ?)";
+        jdbcTemplate.update(sqlDeleteLike, userId, filmId);
     }
 
     @Override
@@ -48,5 +43,4 @@ public class LikesDbStorage implements LikesStorage {
         String sqlLikes = "select user_id from likes where film_id =?";
         return jdbcTemplate.query(sqlLikes, (rs, rowNum) -> rs.getLong("user_id"), filmId);
     }
-
 }

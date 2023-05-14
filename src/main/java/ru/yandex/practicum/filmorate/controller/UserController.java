@@ -1,22 +1,16 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
@@ -43,12 +37,12 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    @PutMapping("/{id}/friends/{friendId}") //добавление в друзья
+    @PutMapping("/{friendId}/friends/{id}") //добавление в друзья
     public void addToFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.addToFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}") //удаление из друзей
+    @DeleteMapping("/{friendId}/friends/{id}") //удаление из друзей
     public void deleteFromFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.deleteFromFriend(id, friendId);
     }
@@ -58,7 +52,7 @@ public class UserController {
         return userService.getAllFriends(id);
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}") //получаем список общих друзей
+   @GetMapping("/{id}/friends/common/{otherId}") //получаем список общих друзей
     public List<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.getCommonFriends(id, otherId);
     }

@@ -1,19 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MpaRating {
-    @NotNull
     private int id;
-    @NotBlank
     private String name;
     private String description;
 }

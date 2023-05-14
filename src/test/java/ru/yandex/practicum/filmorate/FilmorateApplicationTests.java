@@ -2,260 +2,352 @@ package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
     class FilmorateApplicationTests {
-        private final UserDbStorage userStorage;
-        private final FilmDbStorage filmStorage;
-        private final FriendshipDbStorage friendshipDbStorage;
-        private final GenreDbStorage genreDbStorage;
-        private final MpaDbStorage mpaDbStorage;
-        private final LikesDbStorage likesDbStorage;
-        private final FilmGenreDbStorage filmGenreDbStorage;
 
-        User.UserBuilder userBuilder;
-        Film.FilmBuilder filmBuilder;
-        Genre.GenreBuilder genreBuilder;
-        MpaRating.MpaRatingBuilder mpaBuilder;
+    private final UserDbStorage userStorage;
+    private final MpaDbStorage mpaDbStorage;
+    private final FilmDbStorage filmDbStorage;
+    private final GenreDbStorage genreDbStorage;
+    private final FilmGenreStorage filmGenreStorage;
+    private final LikesDbStorage likesDbStorage;
+    private final FriendshipDbStorage friendshipDbStorage;
+    private final JdbcTemplate jdbcTemplate;
 
-        private final LocalDate testReleaseDate = LocalDate.of(2000, 1, 1);
+    @AfterEach
+    public void deleteDbStorages() {
+        JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "users", "films", "friendship", "film_genre", "likes");
+        jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
+    }
 
-        private final JdbcTemplate jdbcTemplate;
+    @Test
+    public void testGetUserById() {
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        Optional<User> userOptional = Optional.ofNullable(userStorage.getUserById(addUser1.getId()));
 
-        @BeforeEach
-        public void setup() {
-            userBuilder = User.builder()
-                    .email("e@mail.ru")
-                    .login("Login")
-                    .name("Name")
-                    .birthday(LocalDate.of(1985, 9, 7));
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", addUser1.getId())
+                );
+    }
 
-            mpaBuilder = MpaRating.builder()
-                    .id(1);
+    @Test
+    public void testGetAllUsers() {
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        User user2 = new User(2, "email2@mail.ru", "login2", "name2",
+                LocalDate.of(1981, 8, 11));
+        User addUser2 = userStorage.addUser(user2);
+        List<User> allUsers = userStorage.getAllUsers();
+        assertNotNull(allUsers);
+        assertEquals(allUsers.size(), 2);
+    }
 
-            genreBuilder = Genre.builder()
-                    .id(1);
+    @Test
+    public void testUpdateUser() {
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        User updateUser1 = new User(1, "emailUpdate@email.ru", "loginUpdate", "nameUpdate",
+                LocalDate.of(1991, 7, 11));
+        userStorage.updateUser(updateUser1);
+        assertNotEquals(addUser1.getEmail(), updateUser1.getEmail());
+        assertEquals("emailUpdate@email.ru", updateUser1.getEmail());
+        assertEquals("loginUpdate", updateUser1.getLogin());
+        assertEquals("nameUpdate", updateUser1.getName());
+    }
 
-            filmBuilder = Film.builder()
-                    .name("Film name")
-                    .description("Film description")
-                    .releaseDate(testReleaseDate)
-                    .duration(90)
-                    .mpaRating(mpaBuilder.build());
-        }
+    @Test
+    public void testAddUser() {
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        assertThat(addUser1)
+                .isNotNull()
+                .hasFieldOrPropertyWithValue("id", addUser1.getId());
+    }
 
-        @AfterEach
-        public void cleanDb() {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "users", "films", "friendship", "film_genre", "likes");
-            jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
-            jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
-        }
+    @Test
+    public void testGetFilmById() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film addFilm1 = filmDbStorage.addFilm(film1);
 
-        @Test
-        public void testAddUser() {
-            User user = userBuilder.build();
-            User userAdded = userStorage.addUser(user);
-            assertThat(userAdded)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L);
-        }
+        Optional<Film> filmOptional = Optional.ofNullable(filmDbStorage.getFilmById(addFilm1.getId()));
 
-        @Test
-        public void testFindUserById() {
-            User user = userBuilder.build();
-            User userAdded = userStorage.addUser(user);
-            User userFound = userStorage.getUserById(userAdded.getId());
-            assertThat(userFound)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L)
-                    .isEqualTo(userAdded);
+        assertThat(filmOptional)
+                .isPresent()
+                .hasValueSatisfying(film ->
+                        assertThat(film).hasFieldOrPropertyWithValue("id", addFilm1.getId())
+                );
+    }
 
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> userStorage.getUserById(-1L)
-            );
-            assertEquals("Пользователь с id -1 не найден", ex.getMessage());
+    @Test
+    public void testAddFilm() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film addFilm1 = filmDbStorage.addFilm(film1);
+        assertThat(addFilm1)
+                .isNotNull()
+                .hasFieldOrPropertyWithValue("id", addFilm1.getId());
+    }
 
-            ex = assertThrows(
-                    NotFoundException.class,
-                    () -> userStorage.getUserById(999L)
-            );
-            assertEquals("Пользователь с id 999 не найден", ex.getMessage());
-        }
+    @Test
+    public void testUpdateFilm() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film addFilm1 = filmDbStorage.addFilm(film1);
+        Film updateFilm1 = new Film(1, "Cредний фильм", "Описание среднего фильма",
+                LocalDate.of(2000, 12, 12), 123, mpa);
+        filmDbStorage.updateFilm(updateFilm1);
 
-        @Test
-        public void testListUsers() {
-            List<User> users = userStorage.getAllUsers();
-            assertThat(users)
-                    .isNotNull()
-                    .isEqualTo(Collections.EMPTY_LIST);
+        assertThat(updateFilm1)
+                .isNotNull()
+                .hasFieldOrPropertyWithValue("id", updateFilm1.getId())
+                .hasFieldOrPropertyWithValue("name", updateFilm1.getName());
 
-            User user = userBuilder.build();
-            userStorage.addUser(user);
-            users = userStorage.getAllUsers();
-            assertNotNull(users);
-            assertEquals(users.size(), 1);
-            assertEquals(users.get(0).getId(), 1);
-        }
+        assertNotEquals(addFilm1.getName(), updateFilm1.getName());
+        assertEquals("Cредний фильм", updateFilm1.getName());
+        assertEquals("Описание среднего фильма", updateFilm1.getDescription());
+    }
 
-        @Test
-        public void testUpdateUser() {
-            User user = userBuilder.build();
-            userStorage.addUser(user);
-            User userToUpdate = userBuilder.id(1L).name("Name Updated").build();
-            User userUpdated = userStorage.updateUser(userToUpdate);
-            assertThat(userUpdated)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L)
-                    .hasFieldOrPropertyWithValue("name", "Name Updated");
+    @Test
+    public void testGetAllFilms() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        MpaRating mpaForFilm2 = mpaDbStorage.getMpaById(3);
+        Film film2 = new Film(2, "Плохой фильм", "Описание плохого фильма",
+                LocalDate.of(1999, 12, 12), 160, mpaForFilm2);
+        filmDbStorage.addFilm(film2);
 
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> userStorage.updateUser(userBuilder.id(-1L).build())
-            );
-            assertEquals("Пользователь с id -1 не найден", ex.getMessage());
+        List<Film> allFilms = filmDbStorage.getAllFilms();
+        assertNotNull(allFilms);
+        assertEquals(allFilms.size(), 2);
+    }
 
-            ex = assertThrows(
-                    NotFoundException.class,
-                    () -> userStorage.updateUser(userBuilder.id(999L).build())
-            );
-            assertEquals("Пользователь с id 999 не найден", ex.getMessage());
-        }
+    @Test
+    public void testGetAllGenres() {
 
-        @Test
-        public void testAddFilm() {
-            Film film = filmBuilder.build();
-            Film filmAdded = filmStorage.addFilm(film);
-            assertThat(filmAdded)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L);
-        }
+        List<Genre> genres = genreDbStorage.getAllGenres();
+        assertEquals(6, genres.size());
+    }
 
-        @Test
-        public void testFindFilmById() {
-            Film film = filmBuilder.build();
-            Film filmAdded = filmStorage.addFilm(film);
-            Film filmFound = filmStorage.getFilmById(filmAdded.getId());
-            assertThat(filmFound)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L)
-                    .hasFieldOrPropertyWithValue("mpa", mpaBuilder.name("G").build());
-            //.isEqualTo(filmAdded);
+    @Test
+    public void testGetGenreById() {
 
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> filmStorage.getFilmById(-1L)
-            );
-            assertEquals("Фильм с id -1 не найден", ex.getMessage());
+        Optional<Genre> genreOptional = Optional.ofNullable(genreDbStorage.getGenreById(3));
 
-            ex = assertThrows(
-                    NotFoundException.class,
-                    () -> filmStorage.getFilmById(999L)
-            );
-            assertEquals("Фильм с id 999 не найден", ex.getMessage());
-        }
+        assertThat(genreOptional)
+                .isPresent()
+                .hasValueSatisfying(genre ->
+                        assertThat(genre).hasFieldOrPropertyWithValue("id", 3)
+                );
 
-        @Test
-        public void testListFilms() {
-            List<Film> films = filmStorage.getAllFilms();
-            assertThat(films)
-                    .isNotNull()
-                    .isEqualTo(Collections.EMPTY_LIST);
+        assertThat(genreOptional)
+                .isPresent()
+                .hasValueSatisfying(genre ->
+                        assertThat(genre).hasFieldOrPropertyWithValue("name", "Мультфильм")
+                );
+    }
 
-            Film film = filmBuilder.build();
-            filmStorage.addFilm(film);
-            films = filmStorage.getAllFilms();
-            assertNotNull(films);
-            assertEquals(films.size(), 1);
-            assertEquals(films.get(0).getId(), 1);
-        }
+    @Test
+    public void testGetGenreByFilmId() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        filmGenreStorage.addGenreToFilm(1, 2);
+        filmGenreStorage.addGenreToFilm(1, 4);
+        List<Genre> genres = genreDbStorage.getGenreByFilm(1);
+        assertEquals(2, genres.size());
+    }
 
-        @Test
-        public void testUpdateFilm() {
-            Film film = filmBuilder.build();
-            filmStorage.addFilm(film);
-            Film filmToUpdate = filmBuilder.id(1L).name("Film name Updated").build();
-            Film filmUpdated = filmStorage.updateFilm(filmToUpdate);
-            assertThat(filmUpdated)
-                    .isNotNull()
-                    .hasFieldOrPropertyWithValue("id", 1L)
-                    .hasFieldOrPropertyWithValue("name", "Film name Updated");
+    @Test
+    public void testAddGenreToFilm() {
 
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> filmStorage.updateFilm(filmBuilder.id(-1L).build())
-            );
-            assertEquals("Фильм с id -1 не найден", ex.getMessage());
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        filmGenreStorage.addGenreToFilm(1, 2);
 
-            ex = assertThrows(
-                    NotFoundException.class,
-                    () -> filmStorage.updateFilm(filmBuilder.id(999L).build())
-            );
-            assertEquals("Фильм с id 999 не найден", ex.getMessage());
-        }
+    List<Genre> genreToFilm = genreDbStorage.getGenreByFilm(1);
+    assertNotNull(genreToFilm);
+    assertEquals(genreToFilm.size(), 1);
 
-        @Test
-        public void testListTopFilms() {
-            List<Film> topFilms = filmStorage.getMostPopularFilms(10);
-            assertThat(topFilms)
-                    .isNotNull()
-                    .isEqualTo(Collections.EMPTY_LIST);
+}
+    @Test
+    public void testRemoveGenresFromFilm() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        filmGenreStorage.addGenreToFilm(1, 2);
+        filmGenreStorage.addGenreToFilm(1, 3);
+        filmGenreStorage.addGenreToFilm(1, 4);
 
-            filmStorage.addFilm(filmBuilder.build());
-            filmStorage.addFilm(filmBuilder.build());
-            userStorage.addUser(userBuilder.build());
+        filmGenreStorage.removeGenreFromFilm(1);
+        List<Genre> genreToFilm = genreDbStorage.getGenreByFilm(1);
 
-            topFilms = filmStorage.getMostPopularFilms(1);
-            assertNotNull(topFilms);
-            assertEquals(topFilms.size(), 1);
-            assertEquals(topFilms.get(0).getId(), 1);
+        assertThat(genreToFilm)
+                .isNotNull()
+                .isEqualTo(Collections.EMPTY_LIST);
+    }
 
-            likesDbStorage.addLike(2, 1);
-            topFilms = filmStorage.getMostPopularFilms(2);
-            assertNotNull(topFilms);
-            assertEquals(topFilms.size(), 2);
-            assertEquals(topFilms.get(0).getId(), 2);
-        }
+    @Test
+    public void testGetAllMpa() {
+        List<MpaRating> mpa = mpaDbStorage.getAllMpa();
+        assertEquals(5, mpa.size());
+    }
 
+    @Test
+    public void testGetMpaById() {
+        Optional<MpaRating> mpaOptional = Optional.ofNullable(mpaDbStorage.getMpaById(3));
 
-        @Test
-        public void testGetFriendsByUser() {
-            User user = userBuilder.build();
-            userStorage.addUser(user);
-            User friend = userBuilder.name("friend").build();
-            userStorage.addUser(friend);
+        assertThat(mpaOptional)
+                .isPresent()
+                .hasValueSatisfying(mpaRating ->
+                        assertThat(mpaRating).hasFieldOrPropertyWithValue("id", 3)
+                );
 
-            List<Long> friends = friendshipDbStorage.getAllFriends(1);
-            assertThat(friends)
-                    .isNotNull()
-                    .isEqualTo(Collections.EMPTY_LIST);
+        assertThat(mpaOptional)
+                .isPresent()
+                .hasValueSatisfying(mpaRating ->
+                        assertThat(mpaRating).hasFieldOrPropertyWithValue("name", "PG-13")
+                );
+    }
 
-            friendshipDbStorage.addToFriend(1, 2);
-            friends = friendshipDbStorage.getAllFriends(1);
-            assertNotNull(friends);
-            assertEquals(friends.size(), 1);
-            assertEquals(friends.get(0), 2);
-        }
+    @Test
+    public void testAddLike() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        likesDbStorage.addLike(1,1);
+        List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
+        assertNotNull(likesFilm);
+    }
+
+    @Test
+    public void testDeleteLike() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        Film film2 = new Film(2, "Просто фильм", "Описание просто фильма",
+                LocalDate.of(2010, 11, 11), 100, mpa);
+        filmDbStorage.addFilm(film2);
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        User user2 = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+        User addUser2 = userStorage.addUser(user2);
+        likesDbStorage.addLike(1,1);
+        likesDbStorage.addLike(2,2);
+
+        likesDbStorage.deleteLike(1,1);
+        likesDbStorage.deleteLike(2,2);
+        List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
+
+        assertThat(likesFilm)
+                .isNotNull()
+                .isEqualTo(Collections.EMPTY_LIST);
+    }
+
+    @Test
+    public void testGetMostPopularFilms() {
+        MpaRating mpa = mpaDbStorage.getMpaById(1);
+        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+                LocalDate.of(2000, 12, 12), 120, mpa);
+        filmDbStorage.addFilm(film1);
+        Film film2 = new Film(2, "Просто фильм", "Описание просто фильма",
+                LocalDate.of(2010, 11, 11), 100, mpa);
+        filmDbStorage.addFilm(film2);
+
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        User user2 = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+        User addUser2 = userStorage.addUser(user2);
+
+        likesDbStorage.addLike(1, 2);
+        likesDbStorage.addLike(1, 1);
+
+        List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1);
+        assertEquals(1, popularFilms.size());
 
 
     }
+
+    @Test
+    public void testAddToFriend() {
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser = userStorage.addUser(user);
+        User friend = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+        User addFriend = userStorage.addUser(friend);
+
+        friendshipDbStorage.addToFriend(1, 2);
+        List<Long> friends = friendshipDbStorage.getAllFriendsByUser(1);
+        assertNotNull(friends);
+    }
+
+    @Test
+    public void testDeleteFromFriend() {
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser = userStorage.addUser(user);
+        User friend = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+        User addFriend = userStorage.addUser(friend);
+
+        friendshipDbStorage.addToFriend(1, 2);
+        friendshipDbStorage.deleteFromFriend(1,2);
+        List<Long> friends = friendshipDbStorage.getAllFriendsByUser(1);
+        
+        assertThat(friends)
+                .isNotNull()
+                .isEqualTo(Collections.EMPTY_LIST);
+    }
+    }
+
+
+

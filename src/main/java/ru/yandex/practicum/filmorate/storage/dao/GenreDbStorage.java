@@ -28,8 +28,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(int id) {
-        String sqlGenreId = "select * from genres where genre_id = ?";
-        try {
+        try {   String sqlGenreId = "select * from genres where genre_id = ?";
             return jdbcTemplate.queryForObject(sqlGenreId, (rs, rowNum) -> mapToRowGenre(rs), id);
         } catch (DataRetrievalFailureException e) {
             throw new NotFoundException("Не существует жанра с таким id" + id);
@@ -37,10 +36,10 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getGenreByFilm(long id) {
+    public List<Genre> getGenreByFilm(long filmId) {
         String sqlGenreFilm = "select g.* from FILM_GENRE as fg join GENRES as g on fg.genre_id = g.genre_id " +
                 "where fg.film_id = ? ORDER BY g.GENRE_ID";
-        return jdbcTemplate.query(sqlGenreFilm, (rs, rowNum) -> mapToRowGenre(rs), id);
+        return jdbcTemplate.query(sqlGenreFilm, (rs, rowNum) -> mapToRowGenre(rs), filmId);
     }
 
     private Genre mapToRowGenre(ResultSet rs) throws SQLException {
