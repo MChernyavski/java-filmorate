@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface MpaStorage {
     List<MpaRating> getAllMpa();
+
     MpaRating getMpaById(int id);
 }
