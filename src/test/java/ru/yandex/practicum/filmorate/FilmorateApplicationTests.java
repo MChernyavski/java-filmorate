@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-    class FilmorateApplicationTests {
+class FilmorateApplicationTests {
 
     private final UserDbStorage userStorage;
     private final MpaDbStorage mpaDbStorage;
@@ -196,18 +196,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
     @Test
     public void testAddGenreToFilm() {
-
         MpaRating mpa = mpaDbStorage.getMpaById(1);
         Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
                 LocalDate.of(2000, 12, 12), 120, mpa);
         filmDbStorage.addFilm(film1);
         filmGenreStorage.addGenreToFilm(1, 2);
 
-    List<Genre> genreToFilm = genreDbStorage.getGenreByFilm(1);
-    assertNotNull(genreToFilm);
-    assertEquals(genreToFilm.size(), 1);
+        List<Genre> genreToFilm = genreDbStorage.getGenreByFilm(1);
+        assertNotNull(genreToFilm);
+        assertEquals(genreToFilm.size(), 1);
+    }
 
-}
     @Test
     public void testRemoveGenresFromFilm() {
         MpaRating mpa = mpaDbStorage.getMpaById(1);
@@ -258,7 +257,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
                 LocalDate.of(1991, 7, 11));
         User addUser1 = userStorage.addUser(user1);
-        likesDbStorage.addLike(1,1);
+        likesDbStorage.addLike(1, 1);
         List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
         assertNotNull(likesFilm);
     }
@@ -278,11 +277,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         User user2 = new User(2, "kotik@mail.ru", "kotik", "kate",
                 LocalDate.of(1998, 7, 11));
         User addUser2 = userStorage.addUser(user2);
-        likesDbStorage.addLike(1,1);
-        likesDbStorage.addLike(2,2);
+        likesDbStorage.addLike(1, 1);
+        likesDbStorage.addLike(2, 2);
 
-        likesDbStorage.deleteLike(1,1);
-        likesDbStorage.deleteLike(2,2);
+        likesDbStorage.deleteLike(1, 1);
+        likesDbStorage.deleteLike(2, 2);
         List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
 
         assertThat(likesFilm)
@@ -312,8 +311,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
         List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1);
         assertEquals(1, popularFilms.size());
-
-
     }
 
     @Test
@@ -340,14 +337,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         User addFriend = userStorage.addUser(friend);
 
         friendshipDbStorage.addToFriend(1, 2);
-        friendshipDbStorage.deleteFromFriend(1,2);
+        friendshipDbStorage.deleteFromFriend(1, 2);
         List<Long> friends = friendshipDbStorage.getAllFriendsByUser(1);
 
         assertThat(friends)
                 .isNotNull()
                 .isEqualTo(Collections.EMPTY_LIST);
     }
-    }
+}
 
 
 
