@@ -28,7 +28,7 @@ public class MpaServiceImpl implements MpaService {
 
     @Override
     public MpaRating getMpaById(int id) {
-        log.info("Получен рейтинг MPA с id" +id);
+        log.info("Получен рейтинг MPA с id", id);
         return mpaStorage.getMpaById(id);
     }
 }
