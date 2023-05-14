@@ -19,9 +19,10 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public void addToFriend(long userId, long friendId) {
-        try { String sqlToFriend = "insert into friendship (user_id, friend_id, status) values (?, ?, false)";
-        jdbcTemplate.update(sqlToFriend, userId, friendId);
-    } catch (DataAccessException e) {
+        try {
+            String sqlToFriend = "insert into friendship (user_id, friend_id, status) values (?, ?, false)";
+            jdbcTemplate.update(sqlToFriend, userId, friendId);
+        } catch (DataAccessException e) {
             throw new ValidateException(String.format("Пользователь с id = %s уже в друзьях у пользователя с id = %s",
                     friendId, userId));
         }
@@ -34,8 +35,8 @@ public class FriendshipDbStorage implements FriendshipStorage {
     }
 
     @Override
-  public void updateFriendStatus(long userId, long friendId, boolean status) {
-            String sqlUpdateStatus = "update friendship set status = ? where user_id = ? and friend_id = ?";
+    public void updateFriendStatus(long userId, long friendId, boolean status) {
+        String sqlUpdateStatus = "update friendship set status = ? where user_id = ? and friend_id = ?";
         jdbcTemplate.update(sqlUpdateStatus, status, userId, friendId);
     }
 
