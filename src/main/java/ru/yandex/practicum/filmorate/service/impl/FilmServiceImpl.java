@@ -96,7 +96,6 @@ public class FilmServiceImpl implements FilmService {
                 .collect(Collectors.toList());
     }
 
-
     public void validateFilms(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("ERROR: поле Name не может быть пустым");
