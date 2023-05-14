@@ -105,15 +105,16 @@ public class UserServiceImpl implements UserService {
                     .map(this::getUserById)
                     .collect(Collectors.toList());
         }
+
         @Override
-        public List<User> getAllFriends (long id) {
+        public List<User> getAllFriends(long id) {
             return friendshipDbStorage.getAllFriendsByUser(id)
                     .stream()
                     .map(this::getUserById)
                     .collect(Collectors.toList());
         }
 
-        public void validateUser (User user){
+        public void validateUser(User user) {
             if (user.getEmail() == null || user.getEmail().isBlank()) {
                 log.error("ERROR: электронная почта пустая");
                 throw new ValidateException("Электронная почта не может быть пустой");
