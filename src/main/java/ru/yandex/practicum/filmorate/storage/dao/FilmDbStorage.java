@@ -82,7 +82,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-
     @Override
     public List<Film> getAllFilms() {
         String sqlAllFilms = "SELECT f.*, m.name as mpa_name " +
@@ -97,7 +96,6 @@ public class FilmDbStorage implements FilmStorage {
                 "as toplist ON f.FILM_ID = toplist.FILM_ID ORDER BY toplist.all_likes DESC LIMIT ?";
         return jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
     }
-
 
     private Film mapRowToFilm(ResultSet rs) throws SQLException {
         long id = rs.getLong("film_id");
@@ -122,6 +120,5 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpa)
                 .build();
     }
-
 }
 

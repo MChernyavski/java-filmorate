@@ -46,5 +46,4 @@ public class FriendshipDbStorage implements FriendshipStorage {
                 "USER_ID FROM FRIENDSHIP WHERE FRIEND_ID = ?";
         return jdbcTemplate.query(sqlAllFriends, (rs, rowNum) -> rs.getLong("friend_id"), id, id);
     }
-
 }

@@ -47,6 +47,7 @@ public class UserDbStorage implements UserStorage {
         user.setId(userKey.longValue());
         return user;
     }
+
     @Override
     public User updateUser(User user) {
         String sqlUpdUs = "UPDATE USERS SET EMAIL = :email, LOGIN = :login, NAME = :name," +
@@ -64,6 +65,7 @@ public class UserDbStorage implements UserStorage {
         }
         return user;
     }
+
     @Override
     public User getUserById(long id) {
         try {
