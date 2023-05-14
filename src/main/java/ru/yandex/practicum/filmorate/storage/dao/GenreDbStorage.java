@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository ("GenreDbStorage")
+@Repository("GenreDbStorage")
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -28,7 +28,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(int id) {
-        try {   String sqlGenreId = "select * from genres where genre_id = ?";
+        try {
+            String sqlGenreId = "select * from genres where genre_id = ?";
             return jdbcTemplate.queryForObject(sqlGenreId, (rs, rowNum) -> mapToRowGenre(rs), id);
         } catch (DataRetrievalFailureException e) {
             throw new NotFoundException("Не существует жанра с таким id" + id);
