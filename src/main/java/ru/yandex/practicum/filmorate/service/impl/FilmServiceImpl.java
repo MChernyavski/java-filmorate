@@ -18,19 +18,12 @@ import java.util.stream.Collectors;
 public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
-
     private final UserStorage userStorage;
-
     private final FilmGenreStorage filmGenreStorage;
-
     private final MpaStorage mpaStorage;
-
     private final GenreStorage genreStorage;
-
     private final LikesDbStorage likesDbStorage;
-
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    
     public static final int LENGTH_DESCRIPTION = 200;
 
     @Autowired
