@@ -342,7 +342,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         friendshipDbStorage.addToFriend(1, 2);
         friendshipDbStorage.deleteFromFriend(1,2);
         List<Long> friends = friendshipDbStorage.getAllFriendsByUser(1);
-        
+
         assertThat(friends)
                 .isNotNull()
                 .isEqualTo(Collections.EMPTY_LIST);

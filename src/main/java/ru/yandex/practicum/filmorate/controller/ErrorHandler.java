@@ -14,7 +14,7 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 @Slf4j
 public class ErrorHandler {
 
-   @ExceptionHandler
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDataRetrievalFailureException(final DataRetrievalFailureException e) {
         log.error(e.getMessage(), e);
