@@ -67,56 +67,56 @@ public class FilmServiceImpl implements FilmService {
                 .collect(Collectors.toList());
     }
 
-        @Override
-        public Film getFilmById ( long id) {
-            Film film = filmStorage.getFilmById(id);
-            genreStorage.getGenreByFilm(film.getId()).forEach(film::addGenre);
-            return film;
-        }
+    @Override
+    public Film getFilmById(long id) {
+        Film film = filmStorage.getFilmById(id);
+        genreStorage.getGenreByFilm(film.getId()).forEach(film::addGenre);
+        return film;
+    }
 
-        @Override
-        public void addLike ( long filmId, long userId) {
-            getFilmById(filmId);
-            userStorage.getUserById(userId);
-            likesDbStorage.addLike(filmId, userId);
-        }
+    @Override
+    public void addLike(long filmId, long userId) {
+        getFilmById(filmId);
+        userStorage.getUserById(userId);
+        likesDbStorage.addLike(filmId, userId);
+    }
 
-        @Override
-        public Film removeLike ( long filmId, long userId) {
-            Film film = getFilmById(filmId);
-            if (film == null) {
-                throw new NotFoundException("Фильм не найден");
-            }
-            userStorage.getUserById(userId);
-            likesDbStorage.deleteLike(filmId, userId);
-            return getFilmById(filmId);
+    @Override
+    public Film removeLike(long filmId, long userId) {
+        Film film = getFilmById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Фильм не найден");
         }
+        userStorage.getUserById(userId);
+        likesDbStorage.deleteLike(filmId, userId);
+        return getFilmById(filmId);
+    }
 
-        @Override
-        public List<Film> getMostPopularFilms ( int count) {
-            return filmStorage.getMostPopularFilms(count);
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        return filmStorage.getMostPopularFilms(count);
+    }
+
+    public void validateFilms(Film film) {
+        if (film.getName() == null || film.getName().isBlank()) {
+            log.error("ERROR: поле Name не может быть пустым");
+            throw new ValidateException("Название фильма не может быть пустым");
         }
-
-        public void validateFilms (Film film){
-            if (film.getName() == null || film.getName().isBlank()) {
-                log.error("ERROR: поле Name не может быть пустым");
-                throw new ValidateException("Название фильма не может быть пустым");
-            }
-            if (film.getDescription().length() > LENGTH_DESCRIPTION) {
-                log.error("ERROR: описание Description не может быть длиннее 200 символов");
-                throw new ValidateException("Максимальная длина описания — " + LENGTH_DESCRIPTION);
-            }
-            if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE) || film.getReleaseDate() == null) {
-                log.error("ERROR: дата релиза у фильма не может быть раньше 28 декабря 1895 года");
-                throw new ValidateException("Дата релиза фильма — не раньше " + MIN_RELEASE_DATE);
-            }
-            if (film.getDuration() <= 0) {
-                log.error("ERROR: продолжительность фильма должна быть положительной");
-                throw new ValidateException("Продолжительность фильма должна быть положительной");
-            }
-            if (film.getMpa() == null) {
-                log.error("ERROR: MPA не загрузился");
-                throw new ValidateException("Необходимо добавить MPA");
-            }
+        if (film.getDescription().length() > LENGTH_DESCRIPTION) {
+            log.error("ERROR: описание Description не может быть длиннее 200 символов");
+            throw new ValidateException("Максимальная длина описания — " + LENGTH_DESCRIPTION);
+        }
+        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE) || film.getReleaseDate() == null) {
+            log.error("ERROR: дата релиза у фильма не может быть раньше 28 декабря 1895 года");
+            throw new ValidateException("Дата релиза фильма — не раньше " + MIN_RELEASE_DATE);
+        }
+        if (film.getDuration() <= 0) {
+            log.error("ERROR: продолжительность фильма должна быть положительной");
+            throw new ValidateException("Продолжительность фильма должна быть положительной");
+        }
+        if (film.getMpa() == null) {
+            log.error("ERROR: MPA не загрузился");
+            throw new ValidateException("Необходимо добавить MPA");
         }
     }
+}
