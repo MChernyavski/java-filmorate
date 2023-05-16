@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/mpa")
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MpaController {
     private final MpaService mpaService;
 

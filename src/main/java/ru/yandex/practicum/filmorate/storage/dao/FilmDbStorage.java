@@ -8,11 +8,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,16 +23,19 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Repository
+@Component
 @Primary
 public class FilmDbStorage implements FilmStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate) {
+    private final GenreStorage genreStorage;
+
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
+        this.genreStorage = genreStorage;
     }
 
     @Override
@@ -73,13 +77,13 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(long id) {
-        try {
-            String sqlFilmById = "SELECT *, MR.NAME FROM FILMS JOIN MPA_RATING MR on MR.MPA_ID = FILMS.MPA_ID " +
-                    "WHERE FILM_ID = ? ";
-            return jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
-        }
+       try {
+           String sqlFilmById = "SELECT *, MR.NAME FROM FILMS JOIN MPA_RATING MR on MR.MPA_ID = FILMS.MPA_ID " +
+                "WHERE FILM_ID = ? ";
+        return jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
+    } catch (EmptyResultDataAccessException e) {
+        throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
+    }
     }
 
     @Override

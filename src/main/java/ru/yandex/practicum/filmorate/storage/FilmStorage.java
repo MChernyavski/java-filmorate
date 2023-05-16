@@ -12,7 +12,7 @@ public interface FilmStorage {
 
     Film getFilmById(long id);
 
-   List<Film> getAllFilms();
+    List<Film> getAllFilms();
 
     List<Film> getMostPopularFilms(Integer count);
 }

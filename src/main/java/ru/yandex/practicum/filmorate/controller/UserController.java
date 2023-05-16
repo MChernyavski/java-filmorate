@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -38,13 +39,13 @@ public class UserController {
     }
 
     @PutMapping("/{friendId}/friends/{id}") //добавление в друзья
-    public void addToFriend(@PathVariable long id, @PathVariable long friendId) {
-        userService.addToFriend(id, friendId);
+    public void addToFriend(@PathVariable long friendId, @PathVariable long id) {
+        userService.addToFriend(friendId, id);
     }
 
     @DeleteMapping("/{friendId}/friends/{id}") //удаление из друзей
-    public void deleteFromFriend(@PathVariable long id, @PathVariable long friendId) {
-        userService.deleteFromFriend(id, friendId);
+    public void deleteFromFriend(@PathVariable long friendId, @PathVariable long id) {
+        userService.deleteFromFriend(friendId, id);
     }
 
     @GetMapping("/{id}/friends") //возвращаем список пользователей-друзей

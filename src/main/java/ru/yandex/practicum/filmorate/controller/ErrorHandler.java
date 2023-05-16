@@ -14,12 +14,12 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleDataRetrievalFailureException(final DataRetrievalFailureException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
+   @ExceptionHandler
+   @ResponseStatus(HttpStatus.NOT_FOUND)
+   public ErrorResponse handleDataRetrievalFailureException(final DataRetrievalFailureException e) {
+   log.error(e.getMessage(), e);
+   return new ErrorResponse(e.getMessage());
+  }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -34,4 +34,5 @@ public class ErrorHandler {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
+
 }

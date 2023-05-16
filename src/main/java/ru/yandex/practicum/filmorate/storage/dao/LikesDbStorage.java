@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 
@@ -11,8 +12,9 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-@Repository("LikesDbStorage")
+//@Repository("LikesDbStorage")
 @Slf4j
+@Component
 public class LikesDbStorage implements LikesStorage {
     private final JdbcTemplate jdbcTemplate;
 

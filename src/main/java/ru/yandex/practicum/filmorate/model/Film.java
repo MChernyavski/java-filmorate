@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -29,6 +26,7 @@ public class  Film {
     private int duration; //продолжительность фильма должна быть положительной
     @NotNull
     private MpaRating mpa;
+    @With
     private final Set<Genre> genres = new HashSet<>();
     private final Set<Long> likes = new HashSet<>();
 
@@ -39,5 +37,4 @@ public class  Film {
     public List<Genre> getGenres() {
         return genres.stream().sorted(Comparator.comparingInt(Genre::getId)).collect(Collectors.toList());
     }
-
 }

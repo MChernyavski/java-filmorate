@@ -14,7 +14,7 @@ public interface FilmService {
 
     Film getFilmById(long id);
 
-    List<Long> addLike(long filmId, long userId);
+    void addLike(long filmId, long userId);
 
     Film removeLike(long filmId, long userId);
 

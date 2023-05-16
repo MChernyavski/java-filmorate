@@ -1,23 +1,28 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.Getter;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
-@Repository("GenreDbStorage")
+@Component
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
+    public GenreDbStorage(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -37,11 +42,12 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getGenreByFilm(long filmId) {
+    public List<Genre> getGenreByFilm(long filmId) { //получаем айди и название жанра для конкретного одного фильма
         String sqlGenreFilm = "select g.* from FILM_GENRE as fg join GENRES as g on fg.genre_id = g.genre_id " +
                 "where fg.film_id = ? ORDER BY g.GENRE_ID";
         return jdbcTemplate.query(sqlGenreFilm, (rs, rowNum) -> mapToRowGenre(rs), filmId);
     }
+
 
     private Genre mapToRowGenre(ResultSet rs) throws SQLException {
         int id = rs.getInt("genre_id");
