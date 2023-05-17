@@ -27,4 +27,13 @@ public class  Film {
     private MpaRating mpa;
     private final Set<Long> likes = new HashSet<>();
     private List<Genre> genres = new ArrayList<>();
+
+    public Film(long id, String name, String description, LocalDate releaseDate, int duration, MpaRating mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+    }
 }

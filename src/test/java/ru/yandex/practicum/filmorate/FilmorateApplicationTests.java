@@ -97,7 +97,7 @@ class FilmorateApplicationTests {
     @Test
     public void testGetFilmById() {
         MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
+        Film film1 = new Film(1,"Хороший фильм", "Описание хорошего фильма",
                 LocalDate.of(2000, 12, 12), 120, mpa);
         Film addFilm1 = filmDbStorage.addFilm(film1);
 
