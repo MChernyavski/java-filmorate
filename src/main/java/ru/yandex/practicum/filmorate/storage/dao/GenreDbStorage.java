@@ -39,7 +39,8 @@ public class GenreDbStorage implements GenreStorage {
         List<Genre> genres = jdbcTemplate.query(sqlGenreId, (rs, rowNum) -> mapToRowGenre(rs), id);
         if (genres.isEmpty()) {
             throw new NotFoundException("Не существует жанра с таким id" + id);
-        } return genres.get(0);
+        }
+        return genres.get(0);
     }
 
     @Override
