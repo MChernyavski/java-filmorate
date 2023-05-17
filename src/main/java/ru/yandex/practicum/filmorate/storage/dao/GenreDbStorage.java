@@ -1,26 +1,31 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Component
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public GenreDbStorage(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -40,19 +45,51 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getGenreByFilm(long filmId) { //получаем айди и название жанра для конкретного одного фильма
+    public void setGenresToFilms(long filmId, List<Genre> genres) {
+        List<Genre> unique = genres.stream().distinct().collect(Collectors.toList());
+        genres.clear();
+        genres.addAll(unique);
+
+        String sqlSetFilmGenres = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+        jdbcTemplate.batchUpdate(sqlSetFilmGenres, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, filmId);
+                ps.setInt(2, genres.get(i).getId());
+            }
+            @Override
+            public int getBatchSize() {
+                return genres.size();
+            }
+        });
+    }
+
+    @Override
+    public List<Genre> getGenreByFilm(long filmId) {
         String sqlGenreFilm = "select g.* from FILM_GENRE as fg join GENRES as g on fg.genre_id = g.genre_id " +
                 "where fg.film_id = ? ORDER BY g.GENRE_ID";
         return jdbcTemplate.query(sqlGenreFilm, (rs, rowNum) -> mapToRowGenre(rs), filmId);
     }
 
+    @Override
+    public Map<Long, Film> getGenresForFilm(Map<Long, Film> films) {
+        Set<Long> filmIds = films.keySet();
+        if (filmIds.isEmpty()) {
+            return films;
+        }
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource("filmIds", filmIds);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        String sql = "SELECT g.genre_id, g.name, fg.film_id FROM genres g " +
+                "INNER JOIN film_genre fg ON g.genre_id = fg.genre_id WHERE fg.film_id IN (:filmIds)";
+        namedParameterJdbcTemplate.query(sql, sqlParameterSource, (rs, rowNum) -> {
+            Film film = films.get(rs.getLong("film_id"));
+            return film.getGenres().add(mapToRowGenre(rs));
+        });
+        return films;
+    }
 
     private Genre mapToRowGenre(ResultSet rs) throws SQLException {
-        int id = rs.getInt("genre_id");
-        String name = rs.getString("name");
-        return Genre.builder()
-                .id(id)
-                .name(name)
-                .build();
+        return new Genre(rs.getInt("genre_id"),
+                rs.getString("name"));
     }
 }

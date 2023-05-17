@@ -17,10 +17,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -29,13 +26,14 @@ public class FilmDbStorage implements FilmStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
-
     private final GenreStorage genreStorage;
+    private final FilmGenreDbStorage filmGenreDbStorage;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage) {
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
+        this.filmGenreDbStorage = filmGenreDbStorage;
     }
 
     @Override
@@ -53,7 +51,6 @@ public class FilmDbStorage implements FilmStorage {
 
         Number userKey = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource(values));
         film.setId(userKey.longValue());
-
         return film;
     }
 
@@ -72,18 +69,20 @@ public class FilmDbStorage implements FilmStorage {
         if (rowsAffected == 0) {
             throw new NotFoundException("Не существует фильма с id {}: " + film.getId());
         }
+
         return film;
     }
 
     @Override
     public Film getFilmById(long id) {
-       try {
-           String sqlFilmById = "SELECT *, MR.NAME FROM FILMS JOIN MPA_RATING MR on MR.MPA_ID = FILMS.MPA_ID " +
-                "WHERE FILM_ID = ? ";
-        return jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
-    } catch (EmptyResultDataAccessException e) {
-        throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
-    }
+        try {
+            String sqlFilmById = "SELECT *, MR.NAME FROM FILMS JOIN MPA_RATING MR on MR.MPA_ID = FILMS.MPA_ID " +
+                    "WHERE FILM_ID = ? ";
+            jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
+            return jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
+        }
     }
 
     @Override
@@ -98,31 +97,19 @@ public class FilmDbStorage implements FilmStorage {
         String sqlPopularFilms = "SELECT f.*, mr.NAME FROM FILMS AS f JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID " +
                 "LEFT JOIN (SELECT FILM_ID, COUNT(USER_ID) AS all_likes FROM LIKES GROUP BY FILM_ID ORDER BY all_likes) " +
                 "as toplist ON f.FILM_ID = toplist.FILM_ID ORDER BY toplist.all_likes DESC LIMIT ?";
+        jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
         return jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
     }
 
     private Film mapRowToFilm(ResultSet rs) throws SQLException {
-        long id = rs.getLong("film_id");
-        String name = rs.getString("name");
-        String description = rs.getString("description");
-        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
-        int duration = rs.getInt("duration");
-        int mpaId = rs.getInt("mpa_id");
-        String mpaName = rs.getString("MPA_RATING.NAME");
-
-        MpaRating mpa = MpaRating.builder()
-                .id(mpaId)
-                .name(mpaName)
-                .build();
-
-        return Film.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .releaseDate(releaseDate)
-                .duration(duration)
-                .mpa(mpa)
-                .build();
+        return new Film(rs.getLong("film_id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("release_date").toLocalDate(),
+                rs.getInt("duration"),
+                new MpaRating(rs.getInt("MPA" +
+                        "_ID"), rs.getString("MPA_RATING.name")),
+                new ArrayList<>());
     }
 }
 

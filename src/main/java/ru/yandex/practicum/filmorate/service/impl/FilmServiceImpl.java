@@ -12,8 +12,6 @@ import ru.yandex.practicum.filmorate.storage.dao.LikesDbStorage;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-
 
 @Slf4j
 @Service
@@ -45,7 +43,10 @@ public class FilmServiceImpl implements FilmService {
     public Film addFilm(Film film) {
         validateFilms(film);
         filmStorage.addFilm(film);
-        film.getGenres().forEach(genre -> filmGenreStorage.addGenreToFilm(film.getId(), genre.getId()));
+        if (film.getGenres() != null) {
+            filmGenreStorage.removeGenreFromFilm(film.getId());
+            genreStorage.setGenresToFilms(film.getId(), film.getGenres());
+        }
         return film;
     }
 
@@ -54,24 +55,28 @@ public class FilmServiceImpl implements FilmService {
         validateFilms(film);
         filmStorage.updateFilm(film);
         filmGenreStorage.removeGenreFromFilm(film.getId());
-        film.getGenres().forEach(genre -> filmGenreStorage.addGenreToFilm(film.getId(), genre.getId()));
+       if (film.getGenres() != null) {
+            genreStorage.setGenresToFilms(film.getId(), film.getGenres());
+        }
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms()
-                .stream()
-                .peek(film -> genreStorage.getGenreByFilm(film.getId())
-                        .forEach(film::addGenre))
-                .collect(Collectors.toList());
+        List<Film> films = filmStorage.getAllFilms();
+        Map<Long, Film> filmsMap = new HashMap<>();
+        for (Film film : films) {
+            filmsMap.put(film.getId(), film);
+        }
+        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
     }
 
     @Override
     public Film getFilmById(long id) {
         Film film = filmStorage.getFilmById(id);
-        genreStorage.getGenreByFilm(film.getId()).forEach(film::addGenre);
-        return film;
+        Map<Long, Film> filmsMap = new HashMap<>();
+        filmsMap.put(film.getId(), film);
+        return genreStorage.getGenresForFilm(filmsMap).get(film.getId());
     }
 
     @Override

@@ -116,6 +116,7 @@ public class UserServiceImpl implements UserService {
         if (friendId < 0) {
             throw new NotFoundException(String.format("Нет пользователя с id = %s", friendId));
         }
+
         Collection<Long> userFriendsIds = friendshipDbStorage.getAllFriendsByUser(userId);
         List<Long> commonFriendsIds = friendshipDbStorage.getAllFriendsByUser(friendId)
                 .stream()

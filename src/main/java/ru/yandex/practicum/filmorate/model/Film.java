@@ -8,7 +8,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -26,15 +25,6 @@ public class  Film {
     private int duration; //продолжительность фильма должна быть положительной
     @NotNull
     private MpaRating mpa;
-    @With
-    private final Set<Genre> genres = new HashSet<>();
     private final Set<Long> likes = new HashSet<>();
-
-    public void addGenre(Genre genre) {
-        genres.add(genre);
-    }
-
-    public List<Genre> getGenres() {
-        return genres.stream().sorted(Comparator.comparingInt(Genre::getId)).collect(Collectors.toList());
-    }
+    private List<Genre> genres = new ArrayList<>();
 }

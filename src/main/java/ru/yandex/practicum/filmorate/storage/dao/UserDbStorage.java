@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 @Primary
-//@Repository
 @Slf4j
 @Component
 public class UserDbStorage implements UserStorage {
