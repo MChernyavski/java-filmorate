@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -69,12 +68,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(long id) {
-        try {
-            String sqlUserById = "select * from users where users.user_id = ?";
-            return jdbcTemplate.queryForObject(sqlUserById, (rs, rowNum) -> mapRowToUser(rs), id);
-        } catch (EmptyResultDataAccessException e) {
+        String sqlUserById = "select * from users where users.user_id = ?";
+        List<User> users = jdbcTemplate.query(sqlUserById, (rs, rowNum) -> mapRowToUser(rs), id);
+        if (users.isEmpty()) {
             throw new NotFoundException(String.format("Пользователь с id = %s не найден", id));
         }
+        return users.get(0);
     }
 
     @Override

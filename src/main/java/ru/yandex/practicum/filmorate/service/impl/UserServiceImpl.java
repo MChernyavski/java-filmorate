@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -109,14 +108,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getCommonFriends(long userId, long friendId) {
-        if (userId < 0) {
-            throw new NotFoundException(String.format("Нет пользователя с id = %s", userId));
-        }
-
-        if (friendId < 0) {
-            throw new NotFoundException(String.format("Нет пользователя с id = %s", friendId));
-        }
-
         Collection<Long> userFriendsIds = friendshipDbStorage.getAllFriendsByUser(userId);
         List<Long> commonFriendsIds = friendshipDbStorage.getAllFriendsByUser(friendId)
                 .stream()

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -36,12 +35,11 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(int id) {
-        try {
-            String sqlGenreId = "select * from genres where genre_id = ?";
-            return jdbcTemplate.queryForObject(sqlGenreId, (rs, rowNum) -> mapToRowGenre(rs), id);
-        } catch (DataRetrievalFailureException e) {
+        String sqlGenreId = "select * from genres where genre_id = ?";
+        List<Genre> genres = jdbcTemplate.query(sqlGenreId, (rs, rowNum) -> mapToRowGenre(rs), id);
+        if (genres.isEmpty()) {
             throw new NotFoundException("Не существует жанра с таким id" + id);
-        }
+        } return genres.get(0);
     }
 
     @Override

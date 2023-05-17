@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -29,12 +28,12 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public MpaRating getMpaById(int id) {
-        try {
-            String sqlMpaById = "select * from mpa_rating where mpa_id = ?";
-            return jdbcTemplate.queryForObject(sqlMpaById, (rs, rowNum) -> mapRowToMpa(rs), id);
-        } catch (DataRetrievalFailureException e) {
+        String sqlMpaById = "select * from mpa_rating where mpa_id = ?";
+        List<MpaRating> mpaRatings = jdbcTemplate.query(sqlMpaById, (rs, rowNum) -> mapRowToMpa(rs), id);
+        if (mpaRatings.isEmpty()) {
             throw new NotFoundException("Не существует Mpa с таким id" + id);
         }
+        return mpaRatings.get(0);
     }
 
     private MpaRating mapRowToMpa(ResultSet rs) throws SQLException {

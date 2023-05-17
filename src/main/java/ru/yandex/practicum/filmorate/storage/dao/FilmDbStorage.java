@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -75,14 +75,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(long id) {
-        try {
-            String sqlFilmById = "SELECT *, MR.NAME FROM FILMS JOIN MPA_RATING MR on MR.MPA_ID = FILMS.MPA_ID " +
-                    "WHERE FILM_ID = ? ";
-            jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
-            return jdbcTemplate.queryForObject(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
-        } catch (EmptyResultDataAccessException e) {
+        String sqlFilmById = "SELECT * FROM FILMS f, MPA_RATING MR WHERE MR.MPA_ID = f.MPA_ID AND FILM_ID = ? ";
+        List<Film> films = jdbcTemplate.query(sqlFilmById, (rs, rowNum) -> mapRowToFilm(rs), id);
+        if (films.isEmpty()) {
             throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
         }
+        return films.get(0);
     }
 
     @Override
@@ -97,19 +95,31 @@ public class FilmDbStorage implements FilmStorage {
         String sqlPopularFilms = "SELECT f.*, mr.NAME FROM FILMS AS f JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID " +
                 "LEFT JOIN (SELECT FILM_ID, COUNT(USER_ID) AS all_likes FROM LIKES GROUP BY FILM_ID ORDER BY all_likes) " +
                 "as toplist ON f.FILM_ID = toplist.FILM_ID ORDER BY toplist.all_likes DESC LIMIT ?";
-        jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
         return jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
     }
 
     private Film mapRowToFilm(ResultSet rs) throws SQLException {
-        return new Film(rs.getLong("film_id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getDate("release_date").toLocalDate(),
-                rs.getInt("duration"),
-                new MpaRating(rs.getInt("MPA" +
-                        "_ID"), rs.getString("MPA_RATING.name")),
-                new ArrayList<>());
+        long id = rs.getLong("film_id");
+        String name = rs.getString("name");
+        String description = rs.getString("description");
+        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
+        int duration = rs.getInt("duration");
+        int mpaId = rs.getInt("mpa_id");
+        String mpaName = rs.getString("MPA_RATING.NAME");
+
+        MpaRating mpa = MpaRating.builder()
+                .id(mpaId)
+                .name(mpaName)
+                .build();
+
+        return Film.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .releaseDate(releaseDate)
+                .duration(duration)
+                .mpa(mpa)
+                .build();
     }
 }
 

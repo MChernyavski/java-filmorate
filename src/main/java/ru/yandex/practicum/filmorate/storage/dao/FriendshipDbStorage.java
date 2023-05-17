@@ -11,12 +11,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-
 public class FriendshipDbStorage implements FriendshipStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
+   @Override
     public void addToFriend(long userId, long friendId) {
         String sqlToFriend = "insert into friendship (user_id, friend_id, status) values (?, ?, false)";
         jdbcTemplate.update(sqlToFriend, userId, friendId);
@@ -36,8 +35,8 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public List<Long> getAllFriendsByUser(long id) {
-        String sqlAllFriends = "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ? AND STATUS = TRUE UNION SELECT " +
-                "USER_ID FROM FRIENDSHIP WHERE FRIEND_ID = ?";
+        String sqlAllFriends = "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ? AND STATUS = TRUE UNION SELECT "
+                + "USER_ID FROM FRIENDSHIP WHERE FRIEND_ID = ?";
         return jdbcTemplate.query(sqlAllFriends, (rs, rowNum) -> rs.getLong("friend_id"), id, id);
     }
 }

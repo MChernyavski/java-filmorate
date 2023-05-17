@@ -96,9 +96,10 @@ class FilmorateApplicationTests {
 
     @Test
     public void testGetFilmById() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1,"Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
+
         Film addFilm1 = filmDbStorage.addFilm(film1);
 
         Optional<Film> filmOptional = Optional.ofNullable(filmDbStorage.getFilmById(addFilm1.getId()));
@@ -112,9 +113,9 @@ class FilmorateApplicationTests {
 
     @Test
     public void testAddFilm() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         Film addFilm1 = filmDbStorage.addFilm(film1);
         assertThat(addFilm1)
                 .isNotNull()
@@ -123,12 +124,15 @@ class FilmorateApplicationTests {
 
     @Test
     public void testUpdateFilm() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         Film addFilm1 = filmDbStorage.addFilm(film1);
-        Film updateFilm1 = new Film(1, "Cредний фильм", "Описание среднего фильма",
-                LocalDate.of(2000, 12, 12), 123, mpa);
+        Film updateFilm1 = Film.builder().id(1).name("Cредний фильм").description("Описание среднего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(123).
+                mpa(MpaRating.builder().id(1).build()).build();
+
         filmDbStorage.updateFilm(updateFilm1);
 
         assertThat(updateFilm1)
@@ -143,13 +147,13 @@ class FilmorateApplicationTests {
 
     @Test
     public void testGetAllFilms() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
-        MpaRating mpaForFilm2 = mpaDbStorage.getMpaById(3);
-        Film film2 = new Film(2, "Плохой фильм", "Описание плохого фильма",
-                LocalDate.of(1999, 12, 12), 160, mpaForFilm2);
+        Film film2 = Film.builder().id(1).name("Плохой фильм").description("Описание плохого фильма").
+                releaseDate(LocalDate.of(1999, 12, 12)).duration(160).
+                mpa(MpaRating.builder().id(3).build()).build();
         filmDbStorage.addFilm(film2);
 
         List<Film> allFilms = filmDbStorage.getAllFilms();
@@ -184,9 +188,9 @@ class FilmorateApplicationTests {
 
     @Test
     public void testGetGenreByFilmId() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
         filmGenreStorage.addGenreToFilm(1, 2);
         filmGenreStorage.addGenreToFilm(1, 4);
@@ -196,9 +200,9 @@ class FilmorateApplicationTests {
 
     @Test
     public void testAddGenreToFilm() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
         filmGenreStorage.addGenreToFilm(1, 2);
 
@@ -209,9 +213,9 @@ class FilmorateApplicationTests {
 
     @Test
     public void testRemoveGenresFromFilm() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
         filmGenreStorage.addGenreToFilm(1, 2);
         filmGenreStorage.addGenreToFilm(1, 3);
@@ -250,9 +254,9 @@ class FilmorateApplicationTests {
 
     @Test
     public void testAddLike() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
                 LocalDate.of(1991, 7, 11));
@@ -264,12 +268,13 @@ class FilmorateApplicationTests {
 
     @Test
     public void testDeleteLike() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
-        Film film2 = new Film(2, "Просто фильм", "Описание просто фильма",
-                LocalDate.of(2010, 11, 11), 100, mpa);
+        Film film2 = Film.builder().id(1).name("Плохой фильм").description("Описание плохого фильма").
+                releaseDate(LocalDate.of(1999, 12, 12)).duration(160).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film2);
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
                 LocalDate.of(1991, 7, 11));
@@ -291,12 +296,13 @@ class FilmorateApplicationTests {
 
     @Test
     public void testGetMostPopularFilms() {
-        MpaRating mpa = mpaDbStorage.getMpaById(1);
-        Film film1 = new Film(1, "Хороший фильм", "Описание хорошего фильма",
-                LocalDate.of(2000, 12, 12), 120, mpa);
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма").
+                releaseDate(LocalDate.of(2000, 12, 12)).duration(120).
+                mpa(MpaRating.builder().id(1).build()).build();
         filmDbStorage.addFilm(film1);
-        Film film2 = new Film(2, "Просто фильм", "Описание просто фильма",
-                LocalDate.of(2010, 11, 11), 100, mpa);
+        Film film2 = Film.builder().id(1).name("Плохой фильм").description("Описание плохого фильма").
+                releaseDate(LocalDate.of(1999, 12, 12)).duration(160).
+                mpa(MpaRating.builder().id(3).build()).build();
         filmDbStorage.addFilm(film2);
 
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
