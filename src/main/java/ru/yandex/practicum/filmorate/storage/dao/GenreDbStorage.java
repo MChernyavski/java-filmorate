@@ -52,11 +52,13 @@ public class GenreDbStorage implements GenreStorage {
 
         String sqlSetFilmGenres = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
         jdbcTemplate.batchUpdate(sqlSetFilmGenres, new BatchPreparedStatementSetter() {
+
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, filmId);
                 ps.setInt(2, genres.get(i).getId());
             }
+            
             @Override
             public int getBatchSize() {
                 return genres.size();
